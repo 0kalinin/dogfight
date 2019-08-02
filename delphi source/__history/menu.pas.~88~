@@ -1,0 +1,162 @@
+unit menu;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms,Data.DB, Data.Win.ADODB, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, graphic;
+
+type
+  TForm1 = class(TForm)
+    Image1: TImage;
+    Image2: TImage;
+    Image3: TImage;
+    ADOConnection1: TADOConnection;
+    ADOQuery1: TADOQuery;
+    DataSource1: TDataSource;
+    Label1: TLabel;
+    Label2: TLabel;
+    Button1: TButton;
+    Button2: TButton;
+    procedure Button1Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure Image1Click(Sender: TObject);
+    procedure Image1MouseLeave(Sender: TObject);
+    procedure Image1MouseEnter(Sender: TObject);
+    procedure Image2MouseEnter(Sender: TObject);
+    procedure Image2MouseLeave(Sender: TObject);
+    procedure Image2Click(Sender: TObject);
+    procedure Label1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form1: TForm1; bmStart,bmStart2,bmExit,bmBG,bmExit2:TBitmap;
+  max:integer; maxname:string;
+
+implementation
+uses main, functions;
+{$R *.dfm}
+
+procedure TForm1.Button1Click(Sender: TObject);
+var i:integer;
+begin
+  Application.Terminate;
+end;
+
+procedure TForm1.Button2Click(Sender: TObject);
+begin
+  ShowMessage('WASD Space  &  NUM8456 0');
+end;
+
+procedure TForm1.FormActivate(Sender: TObject);
+var i : integer;
+begin
+  max:=0;
+  with ADOQuery1 do begin
+        SQL.Clear();
+        SQL.Add('SELECT * FROM score');
+        Open();
+        Active:=true;
+        First;
+        while i<>RecordCount do begin
+          if strtoint(FieldValues['—чет'])>max then begin
+            max:=strtoint(FieldValues['—чет']);
+            maxname:= FieldValues['»грок'];
+          end;
+          next;
+          inc(i);
+        end;
+  end;
+  label1.Caption := maxname + ' : ' + max.ToString+' ';
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+var i:integer;
+begin
+  label2.Width:=270;
+  label1.Width:=500;
+  bitmapSource(bmBG, 'sprites/menu/bgMenu.bmp');
+  bmBG.Transparent := False;
+  Image3.Canvas.Draw(0, 0, bmBG);
+  bitmapSource(bmStart, 'sprites/menu/start.bmp');
+  bitmapSource(bmStart2, 'sprites/menu/start2.bmp');
+  bmStart.Transparent := False;
+  bmStart2.Transparent := False;
+  Image1.Canvas.Draw(0, 0, bmStart);
+  bitmapSource(bmExit, 'sprites/menu/exit.bmp');
+  bitmapSource(bmExit2, 'sprites/menu/exit2.bmp');
+  bmExit.Transparent := False;
+  bmExit2.Transparent := False;
+  Image2.Canvas.Draw(0, 0, bmExit);
+
+  max:=0;
+  with ADOQuery1 do begin
+        SQL.Clear();
+        SQL.Add('SELECT * FROM score');
+        Open();
+        Active:=true;
+        First;
+        while i<>RecordCount do begin
+          if strtoint(FieldValues['—чет'])>max then begin
+            max:=strtoint(FieldValues['—чет']);
+            maxname:= FieldValues['»грок'];
+          end;
+          next;
+          inc(i);
+        end;
+  end;
+  label1.Caption := maxname + ' : ' + max.ToString+' ';
+
+end;
+
+
+procedure TForm1.Image1Click(Sender: TObject);
+var i:integer;
+begin
+  Form4.Show;
+  Form1.Hide;
+  restart;
+  Form4.Button1.Caption:='RESTART';
+  Form4.Label8.Caption := 'WELCOME BACK !';
+end;
+
+procedure TForm1.Image2Click(Sender: TObject);
+begin
+  Application.Terminate;
+end;
+
+
+
+
+//
+
+procedure TForm1.Image1MouseEnter(Sender: TObject);
+begin
+  Image1.Canvas.Draw(0, 0, bmStart2);
+end;
+
+procedure TForm1.Image1MouseLeave(Sender: TObject);
+begin
+  Image1.Canvas.Draw(0, 0, bmStart);
+end;
+
+procedure TForm1.Image2MouseEnter(Sender: TObject);
+begin
+  Image2.Canvas.Draw(0, 0, bmExit2);
+end;
+
+procedure TForm1.Image2MouseLeave(Sender: TObject);
+begin
+  Image2.Canvas.Draw(0, 0, bmExit);
+end;
+
+
+
+end.

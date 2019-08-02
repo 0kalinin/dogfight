@@ -1,0 +1,18 @@
+program ScrollShooter;
+
+uses
+  Vcl.Forms,
+  main in '..\DOGFIGHT cur v3\main.pas' {Form4},
+  objects in '..\DOGFIGHT cur v3\objects.pas',
+  functions in '..\DOGFIGHT cur v3\functions.pas',
+  graphic in '..\DOGFIGHT cur v3\graphic.pas',
+  _functions in '..\DOGFIGHT cur v3\_functions.pas';
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TForm4, Form4);
+  Application.Run;
+end.

@@ -1,0 +1,519 @@
+unit objects;
+
+interface
+
+uses
+  Classes, SysUtils, Graphics;
+
+type
+
+
+  TMasBM = array[0..100] of TBitmap;
+
+
+  TBase = class
+    private
+      x:integer;
+      y:integer;
+    public
+      constructor Create(x0,y0 : integer);
+      procedure setX(x0:integer);
+      procedure setY(y0:integer);
+      function getX():integer;
+      function getY():integer;
+
+  end;
+
+  TStatic = class(TBase)
+    private
+      bitmap : TBitmap;
+    public
+      constructor Create(x0, y0 : Integer; bitmap0 : TBitmap);
+      procedure setBitmap(bitmap0:TBitmap);
+      function getBitmap():TBitmap;
+  end;
+
+  TAnimate = class(Tbase)
+    private
+      bitmap : TMasBM;
+      fstFrame : Integer;
+      curFrame : Integer;
+      maxFrame : integer;
+    public
+      constructor Create(x0, y0 : Integer; bitmap0 : TMasBM; maxFrame0:integer);virtual;
+      procedure nextFrame;
+      procedure setBitmap(bitmap0:TMasBM);
+      function getBitmap():TBitmap;
+      procedure setFrame(frame0,mframe:integer);
+  end;
+
+  TPlayer = class(TAnimate)
+    private
+      HP,delay,maxdelay : integer;
+      speedX,speedY : integer;
+    public
+      //isExist:boolean;
+      procedure setSpeed(speedx0,speedy0 : integer);
+      constructor Create(x0, y0 : Integer; bitmap0 : TMasBM; maxFrame0:integer);
+      procedure moveLeft(isTrue:boolean);
+      procedure moveRight(isTrue:boolean);
+      procedure moveUp(isTrue:boolean);
+      procedure shoot(isTrue:boolean; bitmap0:TBitmap);
+      procedure moveDown(isTrue:boolean);
+      procedure move(l,r,u,d:boolean);
+      function getHP : integer;
+      function getSpeed : integer;
+      procedure setHP (hp0 : integer);
+      function getDelay : integer;
+      procedure setDelay (maxdelay0 : integer);
+
+  end;
+
+  TBground = class(TAnimate)
+    private
+      speed : integer;
+    public
+      function getSpeed:integer;
+      constructor Create(x0, y0 : Integer; bitmap0 : TMasBM; maxFrame0:integer);override;
+      procedure setSpeed(speed0 : integer);
+      procedure scroll;
+  end;
+
+  TClouds = class(TAnimate)
+
+    private
+      speed,r : integer;
+    public
+      function getSpeed:integer;
+      procedure scroll(vectorx : char);
+      procedure setSpeed(speed0 : integer);
+
+      constructor Create(x0, y0: Integer; bitmap0: TMasBM;
+  maxFrame0: integer);override;
+      function getRand : integer;
+  end;
+
+  TBullet = class(TStatic)
+    private
+      speed : integer;
+    public
+      procedure setSpeed(speed0 : integer);
+      procedure moveY;
+  end;
+
+  TEnemy = class(TAnimate)
+    private
+      speedX,speedY,delay,curdelay,hp,bulSpeed:integer;
+      tag:string;
+      Mid : boolean;
+    public
+
+      constructor CreateEN(x0, y0 : Integer; bitmap0 : TMasBM; maxFrame0, hp0, delay0, speedy0, bulSpeed0:integer; tag0:string);
+      procedure setSpeed(speedx0,speedy0 : integer);
+      procedure setMid(isTrue : boolean);
+      procedure setDelay(delay0:integer);
+      function getDelay:integer;
+      function getSpeedX:integer;
+      function getSpeedY:integer;
+      function getMid:boolean;
+      procedure shoot;
+      procedure move;
+      function getHP : integer;
+      function getTag : string;
+      procedure setHP (hp0 : integer);
+  end;
+
+
+
+
+implementation
+
+uses main,functions;
+
+
+{ TBase }
+
+constructor TBase.Create(x0, y0: integer);
+begin
+  setX(x0);
+  setY(y0);
+end;
+
+// Методы-аксессоры для переменных координат
+
+function TBase.getX: integer;
+begin
+  result := x;
+end;
+
+function TBase.getY: integer;
+begin
+  result := y;
+end;
+
+procedure TBase.setX(x0: integer);
+begin
+  x := x0;
+end;
+
+procedure TBase.setY(y0: integer);
+begin
+  y := y0;
+end;
+
+
+
+
+
+{ TStatic }
+
+constructor TStatic.Create(x0, y0: Integer; bitmap0: TBitmap);
+begin
+  setX(x0);
+  setY(y0);
+  setBitmap(bitmap0);
+end;
+
+// Методы-аксессоры для переменной рисунка объекта
+
+function TStatic.getBitmap: TBitmap;
+begin
+  result := bitmap;
+end;
+
+procedure TStatic.setBitmap(bitmap0: TBitmap);
+begin
+  bitmap := bitmap0;;
+end;
+
+
+
+
+
+{ TAnimate }
+
+constructor TAnimate.Create(x0, y0: Integer; bitmap0:TMasBM; maxFrame0:integer);
+begin
+  setX(x0);
+  setY(y0);
+  setBitmap(bitmap0);
+  setFrame(0,maxFrame0);
+end;
+
+// Инициализация массива кадров
+procedure TAnimate.setBitmap(bitmap0:TMasBM);
+begin
+  bitmap := bitmap0;
+end;
+
+// Установка диапозона [ fstFrame .. maxFrame ] в массиве
+procedure TAnimate.setFrame(frame0,mframe: integer);
+begin
+  curFrame := frame0;
+  fstFrame := frame0;
+  maxFrame := mframe;
+end;
+
+// Смена curFrame в отрезке [ fstFrame .. maxFrame ]
+procedure TAnimate.nextFrame;
+begin
+  if curFrame < maxFrame then
+    inc(curFrame)
+  else
+    curFrame := fstFrame;
+end;
+
+// Возврат curFrame кадра из массива кадров
+function TAnimate.getBitmap: TBitmap;
+begin
+  result := bitmap[curFrame];
+end;
+
+
+
+
+
+
+
+{ TPlayer }
+
+
+constructor TPlayer.Create(x0, y0: Integer; bitmap0: TMasBM; maxFrame0:integer);
+begin
+  Inherited;  // полное наследование процедур TAnimate
+  setHP(100);
+  setSpeed(plSpeed,plSpeed);
+  setdelay(12);
+end;
+
+// Методы-аксессоры для переменной HP
+function TPlayer.getDelay: integer;
+begin
+  result:=maxdelay;
+end;
+
+function TPlayer.getHP: integer;
+begin
+  result := HP;
+end;
+
+function TPlayer.getSpeed: integer;
+begin
+  result:=speedX;
+end;
+
+procedure TPlayer.setDelay(maxdelay0: integer);
+begin
+  maxdelay:=maxdelay0;
+end;
+
+procedure TPlayer.setHP(hp0: integer);
+begin
+  HP := hp0;
+end;
+
+procedure TPlayer.setSpeed(speedx0,speedy0 : integer);
+begin
+  speedX := speedx0;
+  speedY := speedy0;
+end;
+
+procedure TPlayer.shoot(isTrue:boolean; bitmap0:TBitmap);
+begin
+  inc(delay);
+  if isTrue then
+    if delay > maxdelay
+        then begin
+          delay := 0;
+          newBullet(Bullets, bitmap0, getX+37, getY-10, 10);
+        end;
+end;
+
+// Изменеие переменных координат для отрисовки
+
+procedure TPlayer.moveUp(isTrue:boolean);
+begin
+  if isTrue then y := y - (speedY-1);
+end;
+
+procedure TPlayer.move(l, r, u, d: boolean);
+begin
+  moveLeft(l);
+  moveRight(r);
+  moveUp(u);
+  moveDown(d);
+end;
+
+procedure TPlayer.moveDown(isTrue:boolean);
+begin
+  if isTrue then y := y + (speedY-1);
+end;
+
+procedure TPlayer.moveLeft(isTrue:boolean);
+begin
+  if isTrue then x := x - speedX;
+end;
+
+procedure TPlayer.moveRight(isTrue:boolean);
+begin
+  if isTrue then x := x + speedX;
+end;
+
+
+
+{ TBground }
+
+constructor TBground.Create(x0, y0: Integer; bitmap0: TMasBM;
+  maxFrame0: integer);
+begin
+  Inherited;
+
+end;
+
+function TBground.getSpeed: integer;
+begin
+  result:=speed;
+end;
+
+procedure TBground.scroll;
+begin
+  y := y + speed;
+  if y > 800 then y := -1600;
+end;
+
+procedure TBground.setSpeed(speed0: integer);
+begin
+  speed := speed0;
+end;
+
+{ TClouds }
+
+constructor TClouds.Create(x0, y0: Integer; bitmap0: TMasBM;
+  maxFrame0: integer);
+begin
+  r := 0;
+  Inherited;
+  randomize;
+  curFrame := Random(17);
+end;
+
+function TClouds.getRand: integer;
+begin
+  result := r;
+end;
+
+function TClouds.getSpeed: integer;
+begin
+  result:=speed;
+end;
+
+procedure TClouds.scroll(vectorx : char);
+begin
+  randomize;
+  y := y + speed;
+  case vectorx of
+    'l':inc(x);
+    'r':dec(x);
+  end;
+  if y > 800 then begin
+    y := -150;
+    case vectorx of
+    'l': x := Random(200)-100;
+    'r': x := 400+Random(100);
+    //'m': x := 200+random(150)
+    end;
+    curFrame := Random(17);
+  end;
+end;
+
+procedure TClouds.setSpeed(speed0 : integer);
+begin
+  speed := speed0;
+end;
+
+{ TBullet }
+
+procedure TBullet.setSpeed(speed0: integer);
+begin
+  speed := speed0;
+end;
+
+procedure TBullet.moveY;
+begin
+  y := y - speed;
+end;
+
+
+
+{ TEnemy }
+
+constructor TEnemy.CreateEN(x0, y0 : Integer; bitmap0 : TMasBM; maxFrame0, hp0, delay0, speedy0, bulSpeed0:integer; tag0:string);
+begin
+  inherited;
+  tag := tag0;
+  setX(x0);
+  setY(y0);
+  setBitmap(bitmap0);
+  setFrame(0,maxFrame0);
+  setSpeed(0,speedy0);
+  setHP(hp0);
+  delay:=delay0;
+  bulSpeed := bulSpeed0;
+end;
+
+function TEnemy.getDelay: integer;
+begin
+  result := delay;
+end;
+
+function TEnemy.getHP: integer;
+begin
+  result := hp;
+end;
+
+function TEnemy.getMid: boolean;
+begin
+  result:=Mid;
+end;
+
+function TEnemy.getSpeedX: integer;
+begin
+  result := speedX;
+end;
+
+function TEnemy.getSpeedY: integer;
+begin
+  result := speedY;
+end;
+
+function TEnemy.getTag: string;
+begin
+ result:=tag;
+end;
+
+procedure TEnemy.move;
+var maxX, minX: integer;   vec : boolean;
+begin
+  y := y + speedY;
+  x := x + speedX;
+  if Mid then begin
+    if isExist then
+      if x < player.getX then speedX:=1;
+      if x > player.getX then speedX:=-1;
+
+
+
+
+
+  end;
+
+  {if speedX>0
+    then setFrame(7,9)
+    else if speedX<0 then setFrame(4,6)
+    else setFrame(0,3);    }
+
+end;
+
+procedure TEnemy.setDelay(delay0:integer);
+begin
+  delay := delay0;
+end;
+
+procedure TEnemy.setHP(hp0: integer);
+begin
+  hp := hp0;
+end;
+
+procedure TEnemy.setMid(isTrue: boolean);
+begin
+  Mid := isTrue;
+end;
+
+procedure TEnemy.setSpeed(speedx0, speedy0: integer);
+begin
+  speedY := speedy0;
+  speedX := speedx0;
+end;
+
+procedure TEnemy.shoot;
+begin
+  inc(curdelay);
+  if curdelay > delay then
+    if tag = 'normal' then begin
+      curdelay := 0;
+      newBullet(BulletsEn, BulSpriteEN, getX+37, getY+45, -bulSpeed);
+    end else
+    if curdelay > delay then
+    if tag = 'fast' then begin
+      curdelay := 0;
+      newBullet(BulletsEn, BulSpriteEN, getX+37, getY+45, -bulSpeed);
+    end else
+    if tag = 'BB' then begin
+      curdelay := 0;
+      newBullet(BulletsEn, BulSpriteEN, getX+30, getY+110, -bulSpeed);
+      newBullet(BulletsEn, BulSpriteEN, getX+185, getY+110, -bulSpeed);
+    end;
+
+end;
+
+end.

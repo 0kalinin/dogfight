@@ -1,0 +1,17 @@
+program ScrollShooter;
+
+uses
+  Vcl.Forms,
+  main in 'main.pas' {Form4},
+  objects in 'objects.pas',
+  functions in 'functions.pas',
+  graphic in 'graphic.pas';
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TForm4, Form4);
+  Application.Run;
+end.

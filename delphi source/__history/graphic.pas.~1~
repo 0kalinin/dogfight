@@ -1,0 +1,53 @@
+unit graphic;
+
+interface
+  uses objects, Graphics, System.SysUtils;
+
+  procedure loadGraphics;
+  procedure bitmapSource(var bitmap0:TBitmap; path:string);
+implementation
+
+uses main;
+
+procedure bitmapSource(var bitmap0:TBitmap; path:string);
+begin
+  bitmap0 := TBitmap.Create;
+  bitmap0.LoadFromFile(path);
+  bitmap0.Transparent := True;
+end;
+
+procedure loadGraphics;
+var i:integer;
+begin
+
+  for i := 0 to 13 do
+    bitmapSource(playerModel[i], 'sprites/player/'+inttostr(i)+'.bmp');
+
+  for i := 0 to 7 do
+    bitmapSource(playerModel2[i], 'sprites/player2/'+inttostr(i)+'.bmp');
+
+  for i := 0 to 17 do
+    bitmapSource(bgClouds[i], 'sprites/clouds/'+inttostr(i)+'.bmp');
+
+  for i := 0 to 9 do
+    bitmapSource(enemyModel[i], 'sprites/enemy/1/'+inttostr(i)+'.bmp');
+  for i := 0 to 6 do
+    bitmapSource(enemyModel2[i], 'sprites/enemy/2/'+inttostr(i)+'.bmp');
+  for i := 0 to 3 do
+    bitmapSource(enemyModel3[i], 'sprites/enemy/3/'+inttostr(i)+'.bmp');
+
+  for i := 0 to 4 do
+    begin
+      bitmapSource(bgSprite0[i], 'sprites/BG/night/dynamic/0/'+inttostr(i)+'.bmp');
+      bitmapSource(bgSprite1[i],'sprites/BG/night/dynamic/1/'+inttostr(i)+'.bmp');
+      bitmapSource(bgSprite2[i], 'sprites/BG/night/dynamic/2/'+inttostr(i)+'.bmp');
+    end;
+
+  bitmapSource(BulSprite, 'sprites/player/bul.bmp');
+  bitmapSource(BulSprite2, 'sprites/player2/bul.bmp');
+  bitmapSource(BulSpriteEN, 'sprites/enemy/bul.bmp');
+
+end;
+
+
+end.
